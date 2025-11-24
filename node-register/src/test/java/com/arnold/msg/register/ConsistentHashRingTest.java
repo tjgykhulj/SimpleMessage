@@ -19,8 +19,8 @@ public class ConsistentHashRingTest {
 
     @Test
     void testBasicFunctionality() {
-        hashRing.registerNode(new DataNode("192.168.1.1", 8080), 2);
-        hashRing.registerNode(new DataNode("192.168.1.1", 8081), 2);
+        hashRing.registerNode(new DataNode("192.168.1.1", 8080));
+        hashRing.registerNode(new DataNode("192.168.1.1", 8081));
 
         DataNode node = hashRing.getNode("test-key");
         assertNotNull(node);

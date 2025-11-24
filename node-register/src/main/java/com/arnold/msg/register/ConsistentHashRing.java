@@ -1,19 +1,22 @@
 package com.arnold.msg.register;
 
-import com.arnold.msg.register.exceptions.EmptyRingException;
+import com.arnold.msg.register.exceptions.EmptyHashRingException;
 import com.google.common.hash.HashFunction;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@Slf4j
 public class ConsistentHashRing {
 
     private final HashFunction hashFunction;
     private final TreeMap<Long, DataNode> ring;
-    private final Map<DataNode, Integer> nodes;
+    private final Map<String, DataNode> nodes;
     private final ReentrantReadWriteLock lock;
 
     public ConsistentHashRing(HashFunction hashFunction) {
@@ -23,15 +26,29 @@ public class ConsistentHashRing {
         this.lock = new ReentrantReadWriteLock();
     }
 
-    public void registerNode(DataNode node, int replicas) {
+    public void refreshAll(Collection<DataNode> allNodes) {
+        log.debug("refresh all data nodes {}", allNodes);
+        lock.writeLock().lock();
+        try {
+            ring.clear();
+            nodes.clear();
+            for (DataNode node: allNodes) {
+                registerNode(node);
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void registerNode(DataNode node) {
         lock.writeLock().lock();
         try {
             removeNodeIfExist(node);
-            for (int i = 0; i < replicas; i++) {
+            for (int i = 0; i < node.getReplicas(); i++) {
                 long hash = hashNode(node, i);
                 ring.put(hash, node);
             }
-            nodes.put(node, replicas);
+            nodes.put(node.getKey(), node);
         } finally {
             lock.writeLock().unlock();
         }
@@ -40,11 +57,11 @@ public class ConsistentHashRing {
     /**
      * Calculate and assign a data node for the input key
      */
-    public DataNode getNode(String key) throws EmptyRingException {
+    public DataNode getNode(String key) throws EmptyHashRingException {
         lock.readLock().lock();
         try {
             if (ring.isEmpty()) {
-                throw new EmptyRingException();
+                throw new EmptyHashRingException();
             }
             long hash = hashKey(key);
             Map.Entry<Long, DataNode> node = ring.ceilingEntry(hash);
@@ -59,9 +76,9 @@ public class ConsistentHashRing {
     }
 
     private void removeNodeIfExist(DataNode node) {
-        Integer replicas = nodes.get(node);
-        if (replicas != null) {
-            for (int i=0; i<replicas; i++) {
+        DataNode existNode = nodes.get(node);
+        if (existNode != null) {
+            for (int i=0; i<existNode.getReplicas(); i++) {
                 long hash = hashNode(node, i);
                 ring.remove(hash);
             }
@@ -70,7 +87,7 @@ public class ConsistentHashRing {
     }
 
     private long hashNode(DataNode node, int index) {
-        return hashKey(node.toString() + ":" + index);
+        return hashKey(node.getKey() + ":" + index);
     }
 
     private long hashKey(String key) {
