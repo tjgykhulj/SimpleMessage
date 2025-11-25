@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>node-register</module>
-        <module>node-register-zookeeper</module>
+        <module>node-registry</module>
+        <module>proto</module>
     </modules>
 
     <properties>
@@ -19,19 +19,32 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <curator.version>5.8.0</curator.version>
         <jackson.version>2.20.1</jackson.version>
+        <grpc.version>1.77.0</grpc.version>
+        <protobuf.version>3.25.1</protobuf.version>
+        <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.arnold.msg</groupId>
-                <artifactId>node-register</artifactId>
-                <version>${version}</version>
+                <artifactId>node-registry</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.arnold.msg</groupId>
-                <artifactId>node-register-zookeeper</artifactId>
-                <version>${version}</version>
+                <artifactId>node-registry-base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.arnold.msg</groupId>
+                <artifactId>node-registry-zookeeper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.arnold.msg</groupId>
+                <artifactId>message-queue-proto</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
@@ -66,6 +79,14 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
