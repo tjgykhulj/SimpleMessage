@@ -13,6 +13,7 @@
         <module>data-service</module>
         <module>meta-service</module>
         <module>proto</module>
+        <module>core</module>
     </modules>
 
     <properties>
@@ -30,7 +31,17 @@
         <dependencies>
             <dependency>
                 <groupId>com.arnold.msg</groupId>
-                <artifactId>node-registry</artifactId>
+                <artifactId>metadata-base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.arnold.msg</groupId>
+                <artifactId>metadata-kafka-operator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.arnold.msg</groupId>
+                <artifactId>metadata-zookeeper-store</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
