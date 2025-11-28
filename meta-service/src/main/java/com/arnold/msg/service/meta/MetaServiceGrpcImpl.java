@@ -26,16 +26,9 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
     public void createQueue(CreateQueueRequest request,
                             StreamObserver<CreateQueueResponse> responseObserver) {
         try {
-            String queueName = request.getQueueName();
-
-            // 创建队列逻辑
-            QueueInfo queueInfo = createQueueInternal(queueName,
-                    request.getPartitionCount(), request.getReplicationFactor());
-
-            // 构建响应（使用生成的Builder）
             CreateQueueResponse response = CreateQueueResponse.newBuilder()
                             .setBase(createSuccessResponse())
-                            .setQueueInfo(convertToProto(queueInfo))
+                            .setQueueInfo(QueueInfo.newBuilder().build())
                             .build();
 
             responseObserver.onNext(response);
@@ -46,16 +39,10 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
         }
     }
 
-    private QueueInfo createQueueInternal(String queueName, int partitionCount, int replicationFactor) {
-        // TODO
-        return QueueInfo.newBuilder().build();
-    }
-
     @Override
     public void assignDataServer(AssignDataServerRequest request,
                                  StreamObserver<AssignDataServerResponse> responseObserver) {
         try {
-            // TODO
             AssignDataServerResponse response =
                     AssignDataServerResponse.newBuilder().build();
             responseObserver.onNext(response);
@@ -66,24 +53,6 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
         }
     }
 
-    private DataServer convertToProto(DataNode node) {
-        return DataServer.newBuilder()
-                .setHost(node.getIp())
-                .setPort(node.getPort())
-                .build();
-    }
-
-    private QueueInfo convertToProto(QueueInfo queueInfo) {
-        return QueueInfo.newBuilder()
-                .setQueueName(queueInfo.getQueueName())
-                .setPartitionCount(queueInfo.getPartitionCount())
-                .setReplicationFactor(queueInfo.getReplicationFactor())
-                .setCreatedTime(queueInfo.getCreatedTime())
-                .setStatus(queueInfo.getStatus())
-                .putAllProperties(queueInfo.getProperties())
-                .build();
-    }
-
     private Response createSuccessResponse() {
         return Response.newBuilder()
                 .setSuccess(true)
@@ -91,18 +60,9 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
                 .build();
     }
 
-    private Response createErrorResponse(String message) {
-        return Response.newBuilder()
-                .setSuccess(false)
-                .setMessage(message)
-                .setErrorCode("INTERNAL_ERROR")
-                .build();
-    }
-
     private <T> void handleError(StreamObserver<T> responseObserver, Exception e, String context) {
         log.error("{}: {}", context, e.getMessage(), e);
         // TODO
     }
-
 
 }
