@@ -1,7 +1,8 @@
 package com.arnold.msg.registry.zk;
 
+import com.arnold.msg.JsonUtils;
+import com.arnold.msg.ZookeeperClientHolder;
 import com.arnold.msg.registry.DataNode;
-import com.arnold.msg.registry.JsonUtils;
 import com.arnold.msg.registry.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -24,13 +25,7 @@ public class ZookeeperNodeRegistry extends NodeRegistry {
 
     public ZookeeperNodeRegistry(String zkAddress, String basePath) throws Exception {
         this.basePath = basePath;
-        this.client = CuratorFrameworkFactory.builder()
-                .connectString(zkAddress)
-                .sessionTimeoutMs(5000)
-                .connectionTimeoutMs(5000)
-                .retryPolicy(new ExponentialBackoffRetry(1000, 3))
-                .build();
-        this.client.start();
+        this.client = ZookeeperClientHolder.getClient();
 
         this.pathChildrenCache = new PathChildrenCache(client, basePath, true);
         this.pathChildrenCache.getListenable().addListener(

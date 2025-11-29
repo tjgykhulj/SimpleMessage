@@ -27,12 +27,12 @@ public class InMemoryMetadataStore implements MetadataStore<Metadata> {
     }
 
     @Override
-    public Metadata delete(String name) {
-        return metadataMap.remove(name);
+    public Metadata deleteByID(String id) {
+        return metadataMap.remove(id);
     }
 
     @Override
-    public Metadata findByName(String name) {
-        return metadataMap.get(name);
+    public Metadata findByID(String id) {
+        return metadataMap.get(id);
     }
 }

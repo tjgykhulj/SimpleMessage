@@ -1,4 +1,4 @@
-package com.arnold.msg.registry.exceptions;
+package com.arnold.msg.exceptions;
 
 public class JsonRuntimeException extends RuntimeException {
 

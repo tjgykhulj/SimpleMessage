@@ -25,11 +25,11 @@ public class InMemoryMetadataTest {
         cluster.setProvider("{}");
         clusterStore.save(cluster);
 
-        ClusterMetadata findCluster = clusterStore.findByName(cluster.getId());
+        ClusterMetadata findCluster = clusterStore.findByID(cluster.getId());
         Assertions.assertNotNull(findCluster);
         Assertions.assertEquals(cluster.toString(), findCluster.toString());
 
-        ClusterMetadata deletedCluster = clusterStore.delete(cluster.getId());
+        ClusterMetadata deletedCluster = clusterStore.deleteByID(cluster.getId());
         Assertions.assertNotNull(deletedCluster);
         Assertions.assertEquals(cluster.toString(), deletedCluster.toString());
     }

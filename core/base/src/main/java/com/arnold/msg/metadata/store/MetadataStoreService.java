@@ -18,11 +18,11 @@ public class MetadataStoreService {
     }
 
     public ClusterMetadata findClusterByQueue(String queueName) {
-        QueueMetadata queue = queueStore.findByName(queueName);
+        QueueMetadata queue = queueStore.findByID(queueName);
         if (queue == null) {
             throw new MetadataNotFoundException("queue not found: " + queueName);
         }
-        ClusterMetadata cluster = clusterStore.findByName(queue.getCluster());
+        ClusterMetadata cluster = clusterStore.findByID(queue.getCluster());
         if (cluster == null) {
             throw new MetadataNotFoundException("cluster not found: " + queue.getCluster());
         }

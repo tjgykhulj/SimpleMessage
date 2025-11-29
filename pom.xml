@@ -41,7 +41,7 @@
             </dependency>
             <dependency>
                 <groupId>com.arnold.msg</groupId>
-                <artifactId>zookeeper-store-provider</artifactId>
+                <artifactId>zookeeper-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

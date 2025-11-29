@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.arnold.msg</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>core</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>server</artifactId>
+    <artifactId>zookeeper-provider</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -20,15 +20,22 @@
     <dependencies>
         <dependency>
             <groupId>com.arnold.msg</groupId>
-            <artifactId>meta-service</artifactId>
+            <artifactId>base</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.arnold.msg</groupId>
-            <artifactId>inmemory-provider</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.arnold.msg</groupId>
-            <artifactId>zookeeper-provider</artifactId>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>

@@ -22,6 +22,10 @@
             <groupId>com.arnold.msg</groupId>
             <artifactId>node-registry-base</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.arnold.msg</groupId>
+            <artifactId>zookeeper-provider</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.curator</groupId>
