@@ -1,13 +1,22 @@
 package com.arnold.msg;
 
 import com.arnold.msg.exceptions.JsonRuntimeException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
 
 @Slf4j
 public class JsonUtils {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper();
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     public static String toJson(Object obj) {
         try {
@@ -23,6 +32,15 @@ public class JsonUtils {
             return MAPPER.readValue(json, clazz);
         } catch (Exception e) {
             log.warn("Failed to deserialize JSON to object: {}", json, e);
+            throw new JsonRuntimeException("JSON deserialization failed", e);
+        }
+    }
+
+    public static Map<String, String> fromJsonToMap(String json) {
+        try {
+            return MAPPER.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.warn("Failed to deserialize JSON to map: {}", json, e);
             throw new JsonRuntimeException("JSON deserialization failed", e);
         }
     }
@@ -44,5 +62,4 @@ public class JsonUtils {
             throw new JsonRuntimeException("JSON bytes deserialization failed", e);
         }
     }
-
 }

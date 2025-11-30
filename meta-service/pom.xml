@@ -20,8 +20,12 @@
     <dependencies>
         <dependency>
             <groupId>com.arnold.msg</groupId>
-            <artifactId>message-queue-proto</artifactId>
+            <artifactId>proto</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.arnold.msg</groupId>
+            <artifactId>base</artifactId>
         </dependency>
         <dependency>
             <groupId>com.arnold.msg</groupId>

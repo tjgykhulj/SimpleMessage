@@ -19,13 +19,20 @@ import com.arnold.msg.metadata.store.MetadataStoreRegistry;
 import com.arnold.msg.metadata.store.ZookeeperMetadataStore;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
 public class InMemoryZKServer {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        initialize();
+        new GrpcServiceBootstrap().start();
+    }
+
+    private static void initialize() {
         // init zk as meta store
         ZookeeperClientHolder.initialize();
         ZookeeperMetadataStore.initialize();
@@ -49,29 +56,5 @@ public class InMemoryZKServer {
 
         BackendOperator operator = BackendOperatorRegistry.getOperator(cluster.getKind());
         operator.createQueue(cluster, queue);
-
-        for (int i=0; i<25; i++) {
-            Message msg = new Message();
-            msg.setData("test".getBytes());
-            msg.setQueue(queue.getId());
-            MessageProducer producer = new InMemoryMessageProducer();
-            producer.send(msg);
-        }
-        for (int i=0; i<2; i++) {
-            String consumerID = "testConsumer" + i;
-            new Thread(() -> {
-                Random random = new Random();
-                MessageConsumer consumer = new InMemoryAtMostOnceMessageConsumer(
-                        consumerID, queue.getId());
-                for (int j = 0; j < 3; j++) {
-                    MessageBatch batch = consumer.poll();
-                    log.info("{} poll {} batch {} with {} messages",
-                            consumerID, j, batch.getBatchId(), batch.getMessages().size());
-                    int seconds = random.nextInt(5, 10);
-                    LockSupport.parkNanos(Duration.ofSeconds(seconds).toNanos());
-                }
-            }).start();
-        }
-
     }
 }

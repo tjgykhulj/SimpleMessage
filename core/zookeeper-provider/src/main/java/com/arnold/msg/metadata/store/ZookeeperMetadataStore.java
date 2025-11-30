@@ -57,6 +57,9 @@ public class ZookeeperMetadataStore<T extends Metadata> implements MetadataStore
         String path = getPath(type, id);
         try {
             byte[] data = deleteOnce(path);
+            if (data == null) {
+                return null;
+            }
             return JsonUtils.fromJsonBytes(data, clazz);
         } catch (KeeperException.BadVersionException e) {
             log.warn("delete conflict: {}", path);
