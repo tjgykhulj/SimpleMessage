@@ -1,6 +1,6 @@
 package com.arnold.msg.registry.zk;
 
-import com.arnold.msg.ZookeeperBootstrap;
+import com.arnold.msg.ZookeeperProviderBootstrap;
 import com.arnold.msg.registry.DataNode;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ public class ZKIntegrationTest {
     }
 
     private void test(DataNode node) throws Exception {
-        ZookeeperBootstrap.initClient();
+        ZookeeperProviderBootstrap.initClient();
         ZookeeperNodeRegistry registry = new ZookeeperNodeRegistry("127.0.0.1:2181", "/test");
         String path = registry.registerNode(node);
 

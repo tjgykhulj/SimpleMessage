@@ -7,3 +7,5 @@ No legacy constraints, no production pressures - just exploring clean design and
 **Current focus**: smart routing and batch delivery semantics.
 
 *Work in progress. Everything is subject to change.*
+
+The entrance is the main method in the submodule server/bootstrap.  

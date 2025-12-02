@@ -16,7 +16,7 @@ public class BackendOperatorRegistry {
 
     public static BackendOperator getOperator(ClusterKind kind) {
         if (!OPERATOR_MAP.containsKey(kind)) {
-            throw new NotInitializeException("Backend Operator has not been initialize with: " + kind);
+            throw new NotInitializeException("Backend Operator has not been initialize for " + kind);
         }
         return OPERATOR_MAP.get(kind);
     }

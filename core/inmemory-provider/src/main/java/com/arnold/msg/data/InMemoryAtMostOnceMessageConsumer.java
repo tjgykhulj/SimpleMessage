@@ -12,17 +12,16 @@ import static com.arnold.msg.data.InMemoryMessageData.OFFSETS;
 public class InMemoryAtMostOnceMessageConsumer implements MessageConsumer {
 
     private final static int BATCH_MESSAGE_COUNT = 10;
-    private final List<Message> queue;
     private final String consumer;
 
 
-    public InMemoryAtMostOnceMessageConsumer(String consumer, String queue) {
+    public InMemoryAtMostOnceMessageConsumer(String consumer) {
         this.consumer = consumer;
-        this.queue = DATA.get(queue);
     }
 
     @Override
-    public synchronized MessageBatch poll() {
+    public synchronized MessageBatch poll(String queueName) {
+        List<Message> queue = DATA.get(queueName);
         List<Message> messages = new ArrayList<>();
         for (int i=0; i<BATCH_MESSAGE_COUNT; i++) {
             Integer off = OFFSETS.getOrDefault(consumer, 0);

@@ -1,6 +1,6 @@
 package com.arnold.msg.metadata;
 
-import com.arnold.msg.InMemoryBootstrap;
+import com.arnold.msg.InMemoryProviderBootstrap;
 import com.arnold.msg.metadata.model.ClusterKind;
 import com.arnold.msg.metadata.model.ClusterMetadata;
 import com.arnold.msg.metadata.model.QueueMetadata;
@@ -16,7 +16,7 @@ public class InMemoryMetadataTest {
 
     @Test
     public void testMetadata() {
-        InMemoryBootstrap.initMetadataStore();
+        InMemoryProviderBootstrap.initMetadataStore();
         MetadataStore<ClusterMetadata> clusterStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CLUSTER);
         ClusterMetadata cluster = new ClusterMetadata();
         cluster.setId("test");
@@ -35,7 +35,7 @@ public class InMemoryMetadataTest {
 
     @Test
     public void testOperator() {
-        InMemoryBootstrap.initBackendOperator();
+        InMemoryProviderBootstrap.initBackendOperator();
         BackendOperator operator = BackendOperatorRegistry.getOperator(ClusterKind.IN_MEMORY);
 
         QueueMetadata queue = new QueueMetadata();
