@@ -25,6 +25,7 @@
         <protobuf.version>3.25.1</protobuf.version>
         <protobuf.plugin.version>0.6.1</protobuf.plugin.version>
         <kafka.version>4.0.1</kafka.version>
+        <commons.version>3.14.0</commons.version>
     </properties>
 
     <dependencyManagement>
@@ -121,6 +122,12 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.version}</version>
             </dependency>
 
             <dependency>

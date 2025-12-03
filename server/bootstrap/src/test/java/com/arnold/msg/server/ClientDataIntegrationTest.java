@@ -1,5 +1,7 @@
 package com.arnold.msg.server;
 
+import com.arnold.msg.JsonUtils;
+import com.arnold.msg.metadata.model.KafkaClusterConfig;
 import com.arnold.msg.proto.common.ClusterInfo;
 import com.arnold.msg.proto.common.ClusterKindEnum;
 import com.arnold.msg.proto.common.QueueInfo;
@@ -14,13 +16,15 @@ import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 @Slf4j
 public class ClientDataIntegrationTest {
 
     private final MetaServiceGrpc.MetaServiceBlockingStub metaBlockingStub;
     private final DataServiceGrpc.DataServiceBlockingStub dataBlockingStub;
 
-    private static final String cluster = "test-cluster";
+    private static final String cluster = "local-cluster";
     private static final String queue = "test-queue";
     private final String producer = "test-p";
 
@@ -38,11 +42,16 @@ public class ClientDataIntegrationTest {
     }
 
     @Test
-    public void testCreateCluster() {
+    public void testCreateLocalCluster() {
+        KafkaClusterConfig config = new KafkaClusterConfig();
+        config.setBootstrapServers("localhost:9092");
+        Map<String, String> provider = JsonUtils.fromObjToMap(config);
+        log.info("provider = {}", provider);
         CreateClusterRequest request = CreateClusterRequest.newBuilder()
                 .setCluster(ClusterInfo.newBuilder()
                         .setName(cluster)
-                        .setKind(ClusterKindEnum.IN_MEMORY)
+                        .setKind(ClusterKindEnum.KAFKA)
+                        .putAllProvider(provider)
                         .build())
                 .build();
         ClusterResponse response = metaBlockingStub.createCluster(request);
@@ -50,7 +59,7 @@ public class ClientDataIntegrationTest {
     }
 
     @Test
-    public void testDeleteCluster() {
+    public void testDeleteLocalCluster() {
         DeleteClusterRequest deleteReq = DeleteClusterRequest.newBuilder()
                 .setName(cluster)
                 .build();

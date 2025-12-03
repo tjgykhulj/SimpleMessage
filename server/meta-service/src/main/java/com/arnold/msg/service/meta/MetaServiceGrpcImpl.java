@@ -4,6 +4,8 @@ import com.arnold.msg.proto.common.ClusterInfo;
 import com.arnold.msg.proto.common.QueueInfo;
 import com.arnold.msg.proto.common.Response;
 import com.arnold.msg.proto.meta.*;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,7 +106,7 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
 
     private <T> void handleError(StreamObserver<T> responseObserver, Exception e, String context) {
         log.error("{}: {}", context, e.getMessage(), e);
-        responseObserver.onError(e);
+        responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
     }
 
 }

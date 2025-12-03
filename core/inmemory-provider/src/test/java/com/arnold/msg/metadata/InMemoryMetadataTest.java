@@ -12,6 +12,8 @@ import com.arnold.msg.metadata.store.MetadataStoreRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 public class InMemoryMetadataTest {
 
     @Test
@@ -21,7 +23,7 @@ public class InMemoryMetadataTest {
         ClusterMetadata cluster = new ClusterMetadata();
         cluster.setId("test");
         cluster.setKind(ClusterKind.IN_MEMORY);
-        cluster.setProvider("{}");
+        cluster.setProvider(new HashMap<>());
         clusterStore.save(cluster);
 
         ClusterMetadata findCluster = clusterStore.findByID(cluster.getId());

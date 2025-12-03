@@ -1,11 +1,13 @@
 package com.arnold.msg;
 
 import com.arnold.msg.exceptions.JsonRuntimeException;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -16,6 +18,7 @@ public class JsonUtils {
     static {
         MAPPER = new ObjectMapper();
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        MAPPER.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static String toJson(Object obj) {
@@ -60,6 +63,24 @@ public class JsonUtils {
         } catch (Exception e) {
             log.debug("Failed to deserialize JSON bytes to object", e);
             throw new JsonRuntimeException("JSON bytes deserialization failed", e);
+        }
+    }
+
+    public static <T> T fromMapToObj(Map<String, String> map, Class<T> clazz) {
+        try {
+            return MAPPER.convertValue(map != null ? map : Collections.emptyMap(), clazz);
+        } catch (Exception e) {
+            log.debug("Failed to convert map to object", e);
+            throw new JsonRuntimeException("convertValue from map to object failed", e);
+        }
+    }
+
+    public static Map<String, String> fromObjToMap(Object obj) {
+        try {
+            return MAPPER.convertValue(obj, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.debug("Failed to convert map to object", e);
+            throw new JsonRuntimeException("convertValue from map to object failed", e);
         }
     }
 }

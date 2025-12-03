@@ -51,18 +51,24 @@ public class MetadataStoreService {
         if (existCluster != null) {
             throw new MetadataAlreadyExistException(clusterInfo.getName() + " already exist");
         }
-        return saveCluster(clusterInfo);
+        ClusterMetadata metadata = new ClusterMetadata();
+        metadata.setId(clusterInfo.getName());
+        metadata.setKind(ClusterKind.valueOf(clusterInfo.getKind().name()));
+        metadata.setProvider(clusterInfo.getProviderMap());
+        getOperator(metadata).validateCluster(metadata);
+        clusterStore.save(metadata);
+        return clusterInfo;
     }
 
     public ClusterInfo deleteCluster(String name) {
         ClusterMetadata metadata = clusterStore.deleteByID(name);
         if (metadata == null) {
-            return null;
+            throw new MetadataNotFoundException("cluster not found: " + name);
         }
         return ClusterInfo.newBuilder()
                 .setName(metadata.getId())
                 .setKind(ClusterKindEnum.valueOf(metadata.getKind().name()))
-                .putAllProvider(JsonUtils.fromJsonToMap(metadata.getProvider()))
+                .putAllProvider(metadata.getProvider())
                 .build();
     }
 
@@ -75,31 +81,23 @@ public class MetadataStoreService {
         if (queue != null) {
             throw new MetadataAlreadyExistException("Queue already exist: " + info.getName());
         }
-        queue = convertToMetadata(info);
+        queue = convertFromProto(info);
         queue.setId(info.getName());
         queue.setCluster(info.getCluster());
-        BackendOperator operator = BackendOperatorRegistry.getOperator(cluster.getKind());
-        operator.createQueue(cluster, queue);
+        getOperator(cluster).createQueue(cluster, queue);
         queue = queueStore.save(queue);
         // TODO queue metadata may have a provider map which added by operator
         return convertToProto(queue);
     }
 
     public QueueInfo deleteQueue(String name) {
+        ClusterMetadata cluster = findClusterByQueue(name);
+        getOperator(cluster).deleteQueue(cluster, name);
         QueueMetadata metadata = queueStore.deleteByID(name);
         return convertToProto(metadata);
     }
 
-    private ClusterInfo saveCluster(ClusterInfo clusterInfo) {
-        ClusterMetadata metadata = new ClusterMetadata();
-        metadata.setId(clusterInfo.getName());
-        metadata.setKind(ClusterKind.valueOf(clusterInfo.getKind().name()));
-        metadata.setProvider(JsonUtils.toJson(clusterInfo.getProviderMap()));
-        clusterStore.save(metadata);
-        return clusterInfo;
-    }
-
-    private QueueMetadata convertToMetadata(QueueInfo info) {
+    private QueueMetadata convertFromProto(QueueInfo info) {
         if (info == null) {
             return null;
         }
@@ -117,5 +115,9 @@ public class MetadataStoreService {
                 .setName(metadata.getId())
                 .setCluster(metadata.getCluster())
                 .build();
+    }
+
+    private BackendOperator getOperator(ClusterMetadata cluster) {
+        return BackendOperatorRegistry.getOperator(cluster.getKind());
     }
 }
