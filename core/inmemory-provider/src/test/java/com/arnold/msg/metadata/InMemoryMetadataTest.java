@@ -44,6 +44,6 @@ public class InMemoryMetadataTest {
         queue.setId("test");
         ClusterMetadata cluster = new ClusterMetadata();
         operator.createQueue(cluster, queue);
-        operator.deleteQueue(cluster, queue.getId());
+        operator.deleteQueue(cluster, queue);
     }
 }

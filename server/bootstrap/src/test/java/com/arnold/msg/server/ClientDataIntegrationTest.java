@@ -4,6 +4,7 @@ import com.arnold.msg.JsonUtils;
 import com.arnold.msg.metadata.model.KafkaClusterConfig;
 import com.arnold.msg.proto.common.ClusterInfo;
 import com.arnold.msg.proto.common.ClusterKindEnum;
+import com.arnold.msg.proto.common.ProducerInfo;
 import com.arnold.msg.proto.common.QueueInfo;
 import com.arnold.msg.proto.data.DataServiceGrpc;
 import com.arnold.msg.proto.data.MessageProto;
@@ -24,9 +25,10 @@ public class ClientDataIntegrationTest {
     private final MetaServiceGrpc.MetaServiceBlockingStub metaBlockingStub;
     private final DataServiceGrpc.DataServiceBlockingStub dataBlockingStub;
 
-    private static final String cluster = "local-cluster";
-    private static final String queue = "test-queue";
+    private final String cluster = "local-cluster";
+    private final String queue = "test-queue";
     private final String producer = "test-p";
+    private final String consumer = "test-c";
 
     public ClientDataIntegrationTest() {
         ManagedChannel channel = ManagedChannelBuilder
@@ -54,7 +56,7 @@ public class ClientDataIntegrationTest {
                         .putAllProvider(provider)
                         .build())
                 .build();
-        ClusterResponse response = metaBlockingStub.createCluster(request);
+        ClusterInfo response = metaBlockingStub.createCluster(request);
         System.out.println("CreateCluster Response: " + response);
     }
 
@@ -63,7 +65,7 @@ public class ClientDataIntegrationTest {
         DeleteClusterRequest deleteReq = DeleteClusterRequest.newBuilder()
                 .setName(cluster)
                 .build();
-        ClusterResponse deleteResp = metaBlockingStub.deleteCluster(deleteReq);
+        ClusterInfo deleteResp = metaBlockingStub.deleteCluster(deleteReq);
         System.out.println("DeleteCluster Response: " + deleteResp);
     }
 
@@ -75,15 +77,27 @@ public class ClientDataIntegrationTest {
                         .setCluster(cluster)
                         .build())
                 .build();
-        QueueResponse response = metaBlockingStub.createQueue(req);
+        QueueInfo response = metaBlockingStub.createQueue(req);
         log.info("CreateQueue Response: {}", response);
     }
 
     @Test
     public void testDeleteQueue() {
         DeleteQueueRequest req = DeleteQueueRequest.newBuilder().setName(queue).build();
-        QueueResponse resp = metaBlockingStub.deleteQueue(req);
-        log.info("DeleteQueue Response: {}", resp);
+        QueueInfo info = metaBlockingStub.deleteQueue(req);
+        log.info("DeleteQueue Response: {}", info);
+    }
+
+    @Test
+    public void testCreateProducer() {
+        CreateProducerRequest req = CreateProducerRequest.newBuilder()
+                .setProducer(ProducerInfo.newBuilder()
+                        .setName(producer)
+                        .setCluster(cluster)
+                        .build())
+                .build();
+        ProducerInfo response = metaBlockingStub.createProducer(req);
+        log.info("Create Response: {}", response);
     }
 
     // after create cluster \ create queue

@@ -1,10 +1,11 @@
 package com.arnold.msg;
 
-import com.arnold.msg.metadata.model.ClusterMetadata;
-import com.arnold.msg.metadata.model.QueueMetadata;
-import com.arnold.msg.metadata.model.ResourceType;
+import com.arnold.msg.metadata.model.*;
 import com.arnold.msg.metadata.store.MetadataStoreRegistry;
 import com.arnold.msg.metadata.store.ZookeeperMetadataStore;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 public class ZookeeperProviderBootstrap {
 
@@ -18,9 +19,9 @@ public class ZookeeperProviderBootstrap {
     }
 
     private static void initMetadataStore() {
-        MetadataStoreRegistry.registerMetadataStore(ResourceType.QUEUE,
-                new ZookeeperMetadataStore<>(ResourceType.QUEUE, QueueMetadata.class));
-        MetadataStoreRegistry.registerMetadataStore(ResourceType.CLUSTER,
-                new ZookeeperMetadataStore<>(ResourceType.CLUSTER, ClusterMetadata.class));
+        for (ResourceType type : ResourceType.values()) {
+            MetadataStoreRegistry.registerMetadataStore(type,
+                    new ZookeeperMetadataStore<>(type, type.getMetadataClass()));
+        }
     }
 }

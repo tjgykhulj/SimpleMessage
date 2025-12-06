@@ -15,7 +15,7 @@ public class InMemoryBackendOperator implements BackendOperator {
     }
 
     @Override
-    public void deleteQueue(ClusterMetadata cluster, String name) {
-        InMemoryMessageData.DATA.remove(name);
+    public void deleteQueue(ClusterMetadata cluster, QueueMetadata queue) {
+        InMemoryMessageData.DATA.remove(queue.getId());
     }
 }

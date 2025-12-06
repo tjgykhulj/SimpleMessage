@@ -1,14 +1,28 @@
 package com.arnold.msg.data;
 
-import com.arnold.msg.metadata.model.ProducerMetadata;
+import com.arnold.msg.metadata.model.*;
+import com.arnold.msg.metadata.store.MetadataStore;
+import com.arnold.msg.metadata.store.MetadataStoreRegistry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class KafkaMessageClientPool implements MessageClientPool {
 
-    private final Map<String, MessageProducer> producerPool = new ConcurrentHashMap<>();
-    private final Map<String, MessageConsumer> consumerPool = new ConcurrentHashMap<>();
+    private final Map<String, MessageProducer> producerPool;
+    private final Map<String, MessageConsumer> consumerPool;
+
+    private final MetadataStore<ProducerMetadata> producerStore;
+    private final MetadataStore<ConsumerMetadata> consumerStore;
+    private final MetadataStore<ClusterMetadata> clusterStore;
+
+    public KafkaMessageClientPool() {
+        this.producerPool = new ConcurrentHashMap<>();
+        this.consumerPool = new ConcurrentHashMap<>();
+        this.producerStore = MetadataStoreRegistry.getMetadataStore(ResourceType.PRODUCER);
+        this.consumerStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CONSUMER);
+        this.clusterStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CLUSTER);
+    }
 
     @Override
     public MessageConsumer getConsumer(String consumer) {
@@ -19,9 +33,10 @@ public class KafkaMessageClientPool implements MessageClientPool {
     @Override
     public MessageProducer getProducer(String producer) {
         return producerPool.computeIfAbsent(producer, p -> {
-            ProducerMetadata metadata = new ProducerMetadata();
-            metadata.setId(producer);
-            return new KafkaMessageProducer(metadata);
+            ProducerMetadata metadata = producerStore.findByID(p);
+            ClusterMetadata cluster = clusterStore.findByID(metadata.getCluster());
+            KafkaClusterMetadata kafkaCluster = new KafkaClusterMetadata(cluster);
+            return new KafkaMessageProducer(kafkaCluster.getConfig(), metadata);
         });
     }
 }

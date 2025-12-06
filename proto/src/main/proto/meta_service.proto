@@ -9,12 +9,23 @@ option java_multiple_files = true;
 import "common.proto";
 
 service MetaService {
-    rpc CreateQueue(CreateQueueRequest) returns (QueueResponse);
-    rpc DeleteQueue(DeleteQueueRequest) returns (QueueResponse);
-    rpc CreateCluster(CreateClusterRequest) returns (ClusterResponse);
-    rpc DeleteCluster(DeleteClusterRequest) returns (ClusterResponse);
     rpc AssignDataServer(AssignDataServerRequest) returns (AssignDataServerResponse);
+    rpc CreateQueue(CreateQueueRequest) returns (common.QueueInfo);
+    rpc DeleteQueue(DeleteQueueRequest) returns (common.QueueInfo);
+    rpc CreateCluster(CreateClusterRequest) returns (common.ClusterInfo);
+    rpc DeleteCluster(DeleteClusterRequest) returns (common.ClusterInfo);
+    rpc CreateProducer(CreateProducerRequest) returns (common.ProducerInfo);
+    rpc CreateConsumer(CreateConsumerRequest) returns (common.ConsumerInfo);
 }
+
+message CreateProducerRequest {
+    common.ProducerInfo producer = 1;
+}
+
+message CreateConsumerRequest {
+    common.ConsumerInfo consumer = 1;
+}
+
 
 message CreateQueueRequest {
     common.QueueInfo queue = 1;
@@ -22,11 +33,6 @@ message CreateQueueRequest {
 
 message DeleteQueueRequest {
     string name = 1;
-}
-
-message QueueResponse {
-    common.Response base = 1;
-    common.QueueInfo queue = 2;
 }
 
 message CreateClusterRequest {
@@ -37,11 +43,6 @@ message DeleteClusterRequest {
     string name = 1;
 }
 
-message ClusterResponse {
-    common.Response base = 1;
-    common.ClusterInfo cluster = 2;
-}
-
 message AssignDataServerRequest {
     string queue_name = 1;
     string client_type = 2;
@@ -49,7 +50,6 @@ message AssignDataServerRequest {
 }
 
 message AssignDataServerResponse {
-    common.Response base = 1;
     repeated common.DataServer data_servers = 2;
     string partition_id = 3;
 }

@@ -1,11 +1,11 @@
 package com.arnold.msg.service.meta;
 
 import com.arnold.msg.proto.common.ClusterInfo;
+import com.arnold.msg.proto.common.ConsumerInfo;
+import com.arnold.msg.proto.common.ProducerInfo;
 import com.arnold.msg.proto.common.QueueInfo;
-import com.arnold.msg.proto.common.Response;
 import com.arnold.msg.proto.meta.*;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,14 +20,10 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
 
     @Override
     public void createQueue(CreateQueueRequest request,
-                            StreamObserver<QueueResponse> responseObserver) {
+                            StreamObserver<QueueInfo> responseObserver) {
         try {
             QueueInfo info = metadataService.createQueue(request.getQueue());
-            QueueResponse response = QueueResponse.newBuilder()
-                    .setBase(successResponse())
-                    .setQueue(info)
-                    .build();
-            responseObserver.onNext(response);
+            responseObserver.onNext(info);
             responseObserver.onCompleted();
         } catch (Exception e) {
             handleError(responseObserver, e, "Failed to create queue");
@@ -35,15 +31,10 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
     }
 
     public void deleteQueue(DeleteQueueRequest request,
-                            StreamObserver<QueueResponse> responseObserver) {
+                            StreamObserver<QueueInfo> responseObserver) {
         try {
             QueueInfo info = metadataService.deleteQueue(request.getName());
-            QueueResponse.Builder builder = QueueResponse.newBuilder()
-                    .setBase(successResponse());
-            if (info != null) {
-                builder.setQueue(info);
-            }
-            responseObserver.onNext(builder.build());
+            responseObserver.onNext(info);
             responseObserver.onCompleted();
         } catch (Exception e) {
             handleError(responseObserver, e, "Failed to create queue");
@@ -52,14 +43,10 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
 
     @Override
     public void createCluster(CreateClusterRequest request,
-                              StreamObserver<ClusterResponse> responseObserver) {
+                              StreamObserver<ClusterInfo> responseObserver) {
         try {
             ClusterInfo cluster = metadataService.createCluster(request.getCluster());
-            ClusterResponse response = ClusterResponse.newBuilder()
-                    .setBase(successResponse())
-                    .setCluster(cluster)
-                    .build();
-            responseObserver.onNext(response);
+            responseObserver.onNext(cluster);
             responseObserver.onCompleted();
         } catch (Exception e) {
             handleError(responseObserver, e, "Failed to create queue");
@@ -68,15 +55,34 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
 
     @Override
     public void deleteCluster(DeleteClusterRequest request,
-                              StreamObserver<ClusterResponse> responseObserver) {
+                              StreamObserver<ClusterInfo> responseObserver) {
         try {
             ClusterInfo cluster = metadataService.deleteCluster(request.getName());
-            ClusterResponse.Builder responseBuilder = ClusterResponse.newBuilder()
-                    .setBase(successResponse());
-            if (cluster != null) {
-                responseBuilder.setCluster(cluster);
-            }
-            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onNext(cluster);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            handleError(responseObserver, e, "Failed to create queue");
+        }
+    }
+
+    @Override
+    public void createProducer(CreateProducerRequest request,
+                               StreamObserver<ProducerInfo> responseObserver) {
+        try {
+            ProducerInfo info = metadataService.createProducer(request.getProducer());
+            responseObserver.onNext(info);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            handleError(responseObserver, e, "Failed to create queue");
+        }
+    }
+
+    @Override
+    public void createConsumer(CreateConsumerRequest request,
+                               StreamObserver<ConsumerInfo> responseObserver) {
+        try {
+            ConsumerInfo info = metadataService.createConsumer(request.getConsumer());
+            responseObserver.onNext(info);
             responseObserver.onCompleted();
         } catch (Exception e) {
             handleError(responseObserver, e, "Failed to create queue");
@@ -95,13 +101,6 @@ public class MetaServiceGrpcImpl extends MetaServiceGrpc.MetaServiceImplBase {
         } catch (Exception e) {
             handleError(responseObserver, e, "Failed to allocate data node");
         }
-    }
-
-    private Response successResponse() {
-        return Response.newBuilder()
-                .setSuccess(true)
-                .setMessage("OK")
-                .build();
     }
 
     private <T> void handleError(StreamObserver<T> responseObserver, Exception e, String context) {

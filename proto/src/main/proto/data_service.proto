@@ -6,8 +6,6 @@ option java_package = "com.arnold.msg.proto.data";
 option java_outer_classname = "DataServiceProto";
 option java_multiple_files = true;
 
-import "common.proto";
-
 service DataService {
   rpc Produce(ProduceRequest) returns (ProduceResponse);
   rpc Consume(ConsumeRequest) returns (ConsumeResponse);

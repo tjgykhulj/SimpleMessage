@@ -1,19 +1,15 @@
 package com.arnold.msg.service.meta;
 
-import com.arnold.msg.JsonUtils;
 import com.arnold.msg.exceptions.MetadataAlreadyExistException;
 import com.arnold.msg.exceptions.MetadataNotFoundException;
-import com.arnold.msg.metadata.model.ClusterKind;
-import com.arnold.msg.metadata.model.ClusterMetadata;
-import com.arnold.msg.metadata.model.QueueMetadata;
-import com.arnold.msg.metadata.model.ResourceType;
+import com.arnold.msg.metadata.model.*;
 import com.arnold.msg.metadata.opeartor.BackendOperator;
 import com.arnold.msg.metadata.opeartor.BackendOperatorRegistry;
 import com.arnold.msg.metadata.store.MetadataStore;
 import com.arnold.msg.metadata.store.MetadataStoreRegistry;
-import com.arnold.msg.proto.common.ClusterInfo;
-import com.arnold.msg.proto.common.ClusterKindEnum;
-import com.arnold.msg.proto.common.QueueInfo;
+import com.arnold.msg.proto.common.*;
+
+import java.util.HashMap;
 
 public class MetadataStoreService {
 
@@ -21,6 +17,8 @@ public class MetadataStoreService {
 
     private final MetadataStore<QueueMetadata> queueStore;
     private final MetadataStore<ClusterMetadata> clusterStore;
+    private final MetadataStore<ProducerMetadata> producerStore;
+    private final MetadataStore<ConsumerMetadata> consumerStore;
 
     public static synchronized MetadataStoreService getInstance() {
         if (INSTANCE == null) {
@@ -30,20 +28,10 @@ public class MetadataStoreService {
     }
 
     private MetadataStoreService() {
-         queueStore = MetadataStoreRegistry.getMetadataStore(ResourceType.QUEUE);
-         clusterStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CLUSTER);
-    }
-
-    public ClusterMetadata findClusterByQueue(String queueName) {
-        QueueMetadata queue = queueStore.findByID(queueName);
-        if (queue == null) {
-            throw new MetadataNotFoundException("queue not found: " + queueName);
-        }
-        ClusterMetadata cluster = clusterStore.findByID(queue.getCluster());
-        if (cluster == null) {
-            throw new MetadataNotFoundException("cluster not found: " + queue.getCluster());
-        }
-        return cluster;
+        queueStore = MetadataStoreRegistry.getMetadataStore(ResourceType.QUEUE);
+        clusterStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CLUSTER);
+        producerStore = MetadataStoreRegistry.getMetadataStore(ResourceType.PRODUCER);
+        consumerStore = MetadataStoreRegistry.getMetadataStore(ResourceType.CONSUMER);        
     }
 
     public ClusterInfo createCluster(ClusterInfo clusterInfo) {
@@ -82,18 +70,50 @@ public class MetadataStoreService {
             throw new MetadataAlreadyExistException("Queue already exist: " + info.getName());
         }
         queue = convertFromProto(info);
-        queue.setId(info.getName());
-        queue.setCluster(info.getCluster());
         getOperator(cluster).createQueue(cluster, queue);
         queue = queueStore.save(queue);
-        // TODO queue metadata may have a provider map which added by operator
         return convertToProto(queue);
     }
 
     public QueueInfo deleteQueue(String name) {
-        ClusterMetadata cluster = findClusterByQueue(name);
-        getOperator(cluster).deleteQueue(cluster, name);
+        QueueMetadata queue = queueStore.findByID(name);
+        if (queue == null) {
+            throw new MetadataNotFoundException("queue not found: " + name);
+        }
+        ClusterMetadata cluster = clusterStore.findByID(queue.getCluster());
+        if (cluster == null) {
+            throw new MetadataNotFoundException("cluster not found: " + queue.getCluster());
+        }
+        getOperator(cluster).deleteQueue(cluster, queue);
         QueueMetadata metadata = queueStore.deleteByID(name);
+        return convertToProto(metadata);
+    }
+
+    public ProducerInfo createProducer(ProducerInfo info) {
+        ClusterMetadata cluster = clusterStore.findByID(info.getCluster());
+        if (cluster == null) {
+            throw new MetadataNotFoundException("Cluster not found: " +info.getCluster());
+        }
+        ProducerMetadata metadata = producerStore.findByID(info.getName());
+        if (metadata != null) {
+            throw new MetadataAlreadyExistException("Queue already exist: " + info.getName());
+        }
+        metadata = convertFromProto(info);
+        metadata = producerStore.save(metadata);
+        return convertToProto(metadata);
+    }
+
+    public ConsumerInfo createConsumer(ConsumerInfo info) {
+        ClusterMetadata cluster = clusterStore.findByID(info.getCluster());
+        if (cluster == null) {
+            throw new MetadataNotFoundException("Cluster not found: " +info.getCluster());
+        }
+        ConsumerMetadata metadata = consumerStore.findByID(info.getName());
+        if (metadata != null) {
+            throw new MetadataAlreadyExistException("Queue already exist: " + info.getName());
+        }
+        metadata = convertFromProto(info);
+        metadata = consumerStore.save(metadata);
         return convertToProto(metadata);
     }
 
@@ -112,6 +132,47 @@ public class MetadataStoreService {
             return null;
         }
         return QueueInfo.newBuilder()
+                .setName(metadata.getId())
+                .setCluster(metadata.getCluster())
+                .build();
+    }
+
+    private ProducerMetadata convertFromProto(ProducerInfo info) {
+        if (info == null) {
+            return null;
+        }
+        ProducerMetadata metadata = new ProducerMetadata();
+        metadata.setId(info.getName());
+        metadata.setCluster(info.getCluster());
+        return metadata;
+    }
+
+    private ProducerInfo convertToProto(ProducerMetadata metadata) {
+        if (metadata == null) {
+            return null;
+        }
+        return ProducerInfo.newBuilder()
+                .setName(metadata.getId())
+                .setCluster(metadata.getCluster())
+                .build();
+    }
+
+    private ConsumerMetadata convertFromProto(ConsumerInfo info) {
+        if (info == null) {
+            return null;
+        }
+        ConsumerMetadata metadata = new ConsumerMetadata();
+        metadata.setId(info.getName());
+        metadata.setQueue(info.getQueue());
+        metadata.setCluster(info.getCluster());
+        return metadata;
+    }
+
+    private ConsumerInfo convertToProto(ConsumerMetadata metadata) {
+        if (metadata == null) {
+            return null;
+        }
+        return ConsumerInfo.newBuilder()
                 .setName(metadata.getId())
                 .setCluster(metadata.getCluster())
                 .build();

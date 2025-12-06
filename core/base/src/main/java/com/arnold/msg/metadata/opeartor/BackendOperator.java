@@ -7,7 +7,7 @@ public interface BackendOperator {
 
     void createQueue(ClusterMetadata cluster, QueueMetadata queue);
 
-    void deleteQueue(ClusterMetadata cluster, String name);
+    void deleteQueue(ClusterMetadata cluster, QueueMetadata queue);
 
     default void validateCluster(ClusterMetadata metadata) {
         // do nothing by default

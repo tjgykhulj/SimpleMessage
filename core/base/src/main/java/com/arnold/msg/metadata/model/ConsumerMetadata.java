@@ -9,6 +9,7 @@ public class ConsumerMetadata implements Metadata {
 
     private String id;
     private String queue;
+    private String cluster;
 
     @Override
     public ResourceType getResourceType() {

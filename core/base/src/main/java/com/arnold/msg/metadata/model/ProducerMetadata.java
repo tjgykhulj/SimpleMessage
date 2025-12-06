@@ -9,7 +9,7 @@ import java.util.Map;
 @Setter
 public class ProducerMetadata implements Metadata {
     private String id;
-    private Map<String, String> provider;
+    private String cluster;
 
     @Override
     public ResourceType getResourceType() {

@@ -2,7 +2,6 @@ package com.arnold.msg.data;
 
 import com.arnold.msg.data.model.Message;
 import com.arnold.msg.exceptions.MessageSendException;
-import com.arnold.msg.metadata.model.KafkaClusterConfig;
 import com.arnold.msg.metadata.model.ProducerMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -19,16 +18,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Slf4j
-public class KafkaMessageProducer implements MessageProducer {
+public class KafkaMessageConsumer implements MessageProducer {
 
     private final Producer<byte[], byte[]> client;
     private final String id;
     private final int timeoutMs;
 
-    public KafkaMessageProducer(KafkaClusterConfig config, ProducerMetadata producer) {
+    public KafkaMessageConsumer(ProducerMetadata producer) {
         // TODO make this configurable in ProducerMetadata
         this.timeoutMs = 5000;
-        Properties props = config.toProperties();
+        Properties props = new Properties();
+        // TODO fetch bootstrap from cluster
+        props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, timeoutMs);
         props.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, timeoutMs);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
